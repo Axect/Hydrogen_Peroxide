@@ -9,5 +9,5 @@ fn main() {
 
     let c = Symbol::new_number("z");
 
-    println!("{:?}", c + (a + b));
+    println!("{:?}", c * (a + b));
 }

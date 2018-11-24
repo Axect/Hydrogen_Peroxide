@@ -1,7 +1,7 @@
 pub use self::Expr::*;
-use std::ops::{Add};
+use std::ops;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Expr {
     Number,
     Add(Box<Expr>, Box<Expr>),
@@ -17,31 +17,40 @@ pub enum Expr {
     Log(Box<Expr>),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Symbol {
     name: String,
     expr: Expr,
 }
 
 impl Symbol {
+    pub fn new(name: String, expr: Expr) -> Symbol {
+        Symbol { name: name, expr: expr }
+    }
+
     pub fn new_number(name: &str) -> Symbol {
         Symbol { name: name.to_string(), expr: Number }
     }
 }
 
-impl Add<Symbol> for Symbol {
+impl ops::Add<Symbol> for Symbol {
     type Output = Symbol;
     fn add(self, other: Symbol) -> Symbol {
         let name_self = self.name;
         let name_other = other.name;
-        let name = format!("{} + {}", name_self, name_other);
+        let name = format!("({} + {})", name_self, name_other);
 
-        let expr = match (self.expr, other.expr) {
-            (Number, Number) => Add(Box::new(Number), Box::new(Number)),
-            (Number, Add(x, y)) => Add(Box::new(Number), Box::new(Add(x, y))),
-            _ => Number,
-        };
+        let expr = Add(Box::new(self.expr), Box::new(other.expr));
 
         Symbol { name: name, expr: expr }
+    }
+}
+
+impl ops::Mul<Symbol> for Symbol {
+    type Output = Symbol;
+    fn mul(self, other: Symbol) -> Symbol {
+        let name = format!("({} * {})", self.name, other.name);
+        let expr = Mul(Box::new(self.expr), Box::new(other.expr));
+        Symbol::new(name, expr)
     }
 }
